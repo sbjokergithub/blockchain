@@ -1,6 +1,7 @@
 package zju.cst.blockchainconsensus;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public abstract class Node {
 	public String ID;
@@ -8,8 +9,8 @@ public abstract class Node {
 	public double coinNumber;
 	public String fragmentationId;
 	public int load;
-	public ArrayList userExtraList;
-	
+	//public ArrayList userExtraList;
+	public Map<String,Double> userExtraList;
 	public String getID() {
 		return ID;
 	}
@@ -40,10 +41,10 @@ public abstract class Node {
 	public void setLoad(int load) {
 		this.load = load;
 	}
-	public ArrayList getUserExtraList() {
+	public Map<String,Double> getUserExtraList() {
 		return userExtraList;
 	}
-	public void setUserExtraList(ArrayList userExtraList) {
+	public void setUserExtraList(Map<String,Double> userExtraList) {
 		this.userExtraList = userExtraList;
 	}
 	public ArrayList<Trading> packageBlock() {
