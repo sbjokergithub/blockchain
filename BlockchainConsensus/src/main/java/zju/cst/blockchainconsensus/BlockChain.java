@@ -5,11 +5,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import static javax.swing.UIManager.put;
+
 public class BlockChain {
-    private Map<String, Fragmentation> fragmentationList;
+    private static Map<String, Fragmentation> fragmentationList;
     private static ArrayList<Trading> transaction;
 
     //Randomly generate validation groups£¿
@@ -30,7 +33,14 @@ public class BlockChain {
 
     //
     public static void main(String[] args) {
-        System.out.println(System.currentTimeMillis());
+
+        Fragmentation fragmentation = new Fragmentation("F000");
+        fragmentationList = new HashMap<String, Fragmentation>() {
+            {
+                put(fragmentation.getID(),fragmentation);
+            }
+        };
+
         //Reads transaction information from a text document
         ArrayList<String> arrayList = new ArrayList<String>();
         transaction = new ArrayList<Trading>();
@@ -46,6 +56,7 @@ public class BlockChain {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         int length = arrayList.size();
         int[] array = new int[length];
         for (int i = 0; i < length; i++) {
@@ -72,6 +83,14 @@ public class BlockChain {
                 tradeTime = Timestamp.valueOf(tradeInfo[3] + " " + tradeInfo[4]);
                 Trading trading = new Trading(tradeInfo[0], Double.parseDouble(tradeInfo[1]), tradeInfo[2], tradeTime);
                 transaction.add(trading);
+            }
+            if (checkNum.equals("2")) {
+                String[] nodeInfo = new String[6];
+                for (int j = 0; j < 6; j++) {
+                    st.hasMoreElements();
+                    nodeInfo[j] = (String) st.nextElement();
+                }
+                OrdinaryNode node = new OrdinaryNode(nodeInfo[0], Double.parseDouble(nodeInfo[1]), nodeInfo[2], Integer.parseInt(nodeInfo[3]));
             }
         }
         for (int i = 0; i < transaction.size(); i++) {

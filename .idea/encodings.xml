@@ -2,5 +2,6 @@
 <project version="4">
   <component name="Encoding" addBOMForNewFiles="with NO BOM">
     <file url="file://$PROJECT_DIR$/BlockchainConsensus/src/main/java/zju/cst/blockchainconsensus/BlockChain.java" charset="GBK" />
+    <file url="PROJECT" charset="GBK" />
   </component>
 </project>

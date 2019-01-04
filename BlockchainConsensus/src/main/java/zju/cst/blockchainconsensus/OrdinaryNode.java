@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class OrdinaryNode extends Node {
+	public OrdinaryNode(String ID, double coinNumber, String fragmentationId, int load) {
+		super(ID, coinNumber, fragmentationId, load);
+	}
+
 	@Override
 	public Map<String,Double> getUserExtraList() {
 		return userExtraList;

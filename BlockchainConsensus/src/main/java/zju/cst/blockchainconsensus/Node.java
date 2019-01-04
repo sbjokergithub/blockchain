@@ -11,6 +11,14 @@ public abstract class Node {
 	public int load;
 	//public ArrayList userExtraList;
 	public Map<String,Double> userExtraList;
+
+	public Node(String ID, double coinNumber, String fragmentationId, int load) {
+		this.ID = ID;
+		this.coinNumber = coinNumber;
+		this.fragmentationId = fragmentationId;
+		this.load = load;
+	}
+
 	public String getID() {
 		return ID;
 	}

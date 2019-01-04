@@ -6,6 +6,15 @@ public class Fragmentation {
 	private String ID;
 	//private ArrayList<String> nodeList;
 	private ArrayList<Node> nodeList;
+
+	public Fragmentation(String ID) {
+		this.ID = ID;
+	}
+
+	public String getID() {
+		return ID;
+	}
+
 	private ArrayList<Trading> transaction;
 	private String masterNode;
 	//How to select the representative nodes?
