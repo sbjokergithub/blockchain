@@ -29,9 +29,9 @@ public class Fragmentation {
 		}
 		return nodeList.get(i).getID();
 	}
-	public static void main(String[] args) {
-		int random=(int)(1+Math.random()*(100));
-		System.out.println(random);
-	}
+//	public static void main(String[] args) {
+//		int random=(int)(1+Math.random()*(100));
+//		System.out.println(random);
+//	}
 	
 }
