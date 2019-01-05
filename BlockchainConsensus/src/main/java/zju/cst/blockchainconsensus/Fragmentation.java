@@ -39,11 +39,11 @@ public class Fragmentation {
     public Node bestNode()
     {
 //    	nodeList=null;
-    	int min=nodeList.get(0).myUser.size();
+    	int min=nodeList.get(0).getUserNumber();
     	int index=0;
     	for(int i=1;i<nodeList.size();i++){
-    		if(nodeList.get(i).myUser.size()<min){
-    			min=nodeList.get(i).myUser.size();
+    		if(nodeList.get(i).getUserNumber()<min){
+    			min=nodeList.get(i).getUserNumber();
     			index=i;
     		}
     	}

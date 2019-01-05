@@ -32,6 +32,11 @@ public abstract class Node {
         this.myUser.add(user);
     }
 
+    //the user number in this node
+    public int getUserNumber() {
+    	return this.myUser.size();
+    }
+    
     public double getCoinNumber() {
         return coinNumber;
     }
