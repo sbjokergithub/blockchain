@@ -1,0 +1,6 @@
+0 sender1 10 receiver1 2018-12-12 00:00:00
+0 sender2 20 receiver2 2018-12-12 00:00:00
+0 sender3 30 receiver3 2018-12-12 00:00:00
+1 sender4 40 receiver4 2018-12-12 00:00:00
+1 sender5 50 receiver5 2018-12-12 00:00:00
+1 sender6 60 receiver6 2018-12-12 00:00:00

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class OrdinaryNode extends Node {
+	private ArrayList<Node> ordinaryNode;
+	private ArrayList<Node> masterNode;
     public OrdinaryNode(String ID, double coinNumber, Fragmentation fragmentation, int load) {
         super(ID, coinNumber, fragmentation, load);
     }
@@ -62,12 +64,32 @@ public class OrdinaryNode extends Node {
     //Broadcast the results of simulation execution to all nodes in the sharding and all representative nodes
     @Override
     public String broadcast() {
+    	masterNode=null;
+    	int i;
+    	for(i=0;i<masterNode.size();i++){
+    		masterNode.get(i).simulationExecution();//将区块传递过去
+    	}
+    	ordinaryNode=null;
+    	for(i=0;i<ordinaryNode.size();i++){
+    		ordinaryNode.get(i).simulationExecution();//将区块传递过去
+    	}
         return null;
     }
 
     //Connect blocks to the block chain and update the local user balance table
     @Override
     public void chargeAccount() {
+    	userExtraList=null;
+    	int number=0;
+    	int i;
+    	for(i=0;i<ordinaryNode.size();i++){
+    		if(userExtraList.equals(ordinaryNode.get(i).userExtraList)){
+    			number++;
+    		}
+    	}
+    	if(number>ordinaryNode.size()/3*2){
+    		
+    	}
     }
 
     //User dynamic adjustment

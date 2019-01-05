@@ -90,7 +90,7 @@ public class BlockChain {
         ArrayList<String> arrayList = new ArrayList<String>();
         transaction = new ArrayList<Trading>();
         try {
-            FileReader fr = new FileReader("C:/Users/73162/git/blockchain/tradingpool.txt");
+            FileReader fr = new FileReader("E:/blockchainconsensus/blockchain/tradingpool.txt");
             BufferedReader bf = new BufferedReader(fr);
             String str;
             while ((str = bf.readLine()) != null) {
