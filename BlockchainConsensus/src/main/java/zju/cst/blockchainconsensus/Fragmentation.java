@@ -36,10 +36,20 @@ public class Fragmentation {
     }
 
     //chose a best ordinary node to store a new user
-//    public Node bestNode()
-//    {
-//
-//    }
+    public Node bestNode()
+    {
+//    	nodeList=null;
+    	int min=nodeList.get(0).myUser.size();
+    	int index=0;
+    	for(int i=1;i<nodeList.size();i++){
+    		if(nodeList.get(i).myUser.size()<min){
+    			min=nodeList.get(i).myUser.size();
+    			index=i;
+    		}
+    	}
+    	
+		return nodeList.get(index);
+    }
 
     //How to select the representative nodes?
     public String chooseMasterNode() {

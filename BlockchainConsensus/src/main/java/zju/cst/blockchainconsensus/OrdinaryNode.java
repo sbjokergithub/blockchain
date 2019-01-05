@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class OrdinaryNode extends Node {
-    public OrdinaryNode(String ID, double coinNumber, String fragmentationId, int load) {
-        super(ID, coinNumber, fragmentationId, load);
+    public OrdinaryNode(String ID, double coinNumber, Fragmentation fragmentation, int load) {
+        super(ID, coinNumber, fragmentation, load);
     }
 
     @Override
