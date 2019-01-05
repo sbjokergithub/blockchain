@@ -13,6 +13,8 @@ import static javax.swing.UIManager.put;
 
 public class BlockChain {
     private static Map<String, Fragmentation> fragmentationList;
+    private static Map<String, Node> nodeList;
+    private static Map<String, User> userList;
     private static ArrayList<Trading> transaction;
 
     //Randomly generate validation groups£¿
@@ -31,15 +33,58 @@ public class BlockChain {
         return false;
     }
 
+    //add node, add user, add trading
+    public static void checkNum(StringTokenizer st)
+    {
+        st.hasMoreElements();
+        String checkNum = (String) st.nextElement();
+        //add user
+        if (checkNum.equals("0")) {
+            String[] userInfo = new String[5];
+            for (int j = 0; j < 5; j++) {
+                st.hasMoreElements();
+                userInfo[j] = (String) st.nextElement();
+            }
+            Fragmentation fragmentation = fragmentationList.get(userInfo[1]);
+//            OrdinaryNode node = fragmentation.bestNode();
+            User user = new User(userInfo[0], userInfo[1], Double.parseDouble(userInfo[2]));
+            userList.put(user.getID(), user);
+
+            fragmentation.addUser(user);
+        }
+        //add trading
+        if (checkNum.equals("1")) {
+            String[] tradeInfo = new String[5];
+            for (int k = 0; k < 5; k++) {
+                st.hasMoreElements();
+                tradeInfo[k] = (String) st.nextElement();
+            }
+            Timestamp tradeTime;
+            tradeTime = Timestamp.valueOf(tradeInfo[3] + " " + tradeInfo[4]);
+            Trading trading = new Trading(tradeInfo[0], Double.parseDouble(tradeInfo[1]), tradeInfo[2], tradeTime);
+            transaction.add(trading);
+
+        }
+        //add node
+        if (checkNum.equals("2")) {
+            String[] nodeInfo = new String[6];
+            for (int j = 0; j < 6; j++) {
+                st.hasMoreElements();
+                nodeInfo[j] = (String) st.nextElement();
+            }
+            OrdinaryNode node = new OrdinaryNode(nodeInfo[0], Double.parseDouble(nodeInfo[1]), nodeInfo[2], Integer.parseInt(nodeInfo[3]));
+            nodeList.put(node.getID(), node);
+        }
+    }
+
     //
     public static void main(String[] args) {
+        fragmentationList = new HashMap<String, Fragmentation>();
+        nodeList = new HashMap<String, Node>();
+        userList = new HashMap<String, User>();
 
         Fragmentation fragmentation = new Fragmentation("F000");
-        fragmentationList = new HashMap<String, Fragmentation>() {
-            {
-                put(fragmentation.getID(),fragmentation);
-            }
-        };
+        fragmentationList.put(fragmentation.getID(), fragmentation);
 
         //Reads transaction information from a text document
         ArrayList<String> arrayList = new ArrayList<String>();
@@ -63,37 +108,12 @@ public class BlockChain {
             String s = arrayList.get(i);
             StringTokenizer st = new StringTokenizer(s, ",!' '.;");
 
-            st.hasMoreElements();
-            String checkNum = (String) st.nextElement();
-            if (checkNum.equals("0")) {
-                String[] userInfo = new String[5];
-                for (int j = 0; j < 5; j++) {
-                    st.hasMoreElements();
-                    userInfo[j] = (String) st.nextElement();
-                }
-                User user = new User(userInfo[0], userInfo[1], Double.parseDouble(userInfo[2]));
-            }
-            if (checkNum.equals("1")) {
-                String[] tradeInfo = new String[5];
-                for (int j = 0; j < 5; j++) {
-                    st.hasMoreElements();
-                    tradeInfo[j] = (String) st.nextElement();
-                }
-                Timestamp tradeTime;
-                tradeTime = Timestamp.valueOf(tradeInfo[3] + " " + tradeInfo[4]);
-                Trading trading = new Trading(tradeInfo[0], Double.parseDouble(tradeInfo[1]), tradeInfo[2], tradeTime);
-                transaction.add(trading);
-            }
-            if (checkNum.equals("2")) {
-                String[] nodeInfo = new String[6];
-                for (int j = 0; j < 6; j++) {
-                    st.hasMoreElements();
-                    nodeInfo[j] = (String) st.nextElement();
-                }
-                OrdinaryNode node = new OrdinaryNode(nodeInfo[0], Double.parseDouble(nodeInfo[1]), nodeInfo[2], Integer.parseInt(nodeInfo[3]));
-            }
+            checkNum(st);
+
         }
+
         for (int i = 0; i < transaction.size(); i++) {
+
             System.out.println(transaction.get(i));
         }
 
