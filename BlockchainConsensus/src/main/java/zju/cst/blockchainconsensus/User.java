@@ -2,12 +2,12 @@ package zju.cst.blockchainconsensus;
 
 public class User {
     private String ID;
-    private Node node;
+    private String nodeId;
     private double chargeAccount;
 
-    public User(String ID, Node node, double chargeAccount) {
+    public User(String ID, String nodeId, double chargeAccount) {
         this.ID = ID;
-        this.node = node;
+        this.nodeId = nodeId;
         this.chargeAccount = chargeAccount;
     }
 
@@ -15,24 +15,8 @@ public class User {
         return ID;
     }
 
-    //get my node
-    public Node getNode() {
-        return this.node;
-    }
-
-    //get my node ID
     public String getNodeId() {
-        return this.node.getID();
-    }
-
-    //get my fragment
-    public Fragmentation getFragmentation(){
-        return this.node.getFragmentation();
-    }
-
-    //get my fragment ID
-    public String getFragmentationID(){
-        return this.getFragmentation().getID();
+        return nodeId;
     }
 
     public double getChargeAccount() {
@@ -41,7 +25,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User [ID=" + ID + ", nodeId=" + this.getNodeId() + ", chargeAccount=" + chargeAccount + "]";
+        return "User [ID=" + ID + ", nodeId=" + nodeId + ", chargeAccount=" + chargeAccount + "]";
     }
 
 }

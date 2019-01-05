@@ -7,17 +7,16 @@ public abstract class Node {
     public String ID;
     public ArrayList<Trading> block;
     public double coinNumber;
-    public Fragmentation fragmentation;
+    public String fragmentationId;
     public int load;
+    //public ArrayList userExtraList;
     public Map<String, Double> userExtraList;
-    public ArrayList<User> myUser;
 
-    public Node(String ID, double coinNumber, Fragmentation fragmentation, int load) {
+    public Node(String ID, double coinNumber, String fragmentationId, int load) {
         this.ID = ID;
         this.coinNumber = coinNumber;
-        this.fragmentation = fragmentation;
+        this.fragmentationId = fragmentationId;
         this.load = load;
-        this.myUser = new ArrayList<User>();
     }
 
     public String getID() {
@@ -25,34 +24,44 @@ public abstract class Node {
     }
 
     public ArrayList<Trading> getBlock() {
-        return this.block;
+        return block;
     }
 
-    public void addUser(User user) {
-        this.myUser.add(user);
+    public void setBlock(ArrayList<Trading> block) {
+        this.block = block;
     }
 
     public double getCoinNumber() {
         return coinNumber;
     }
 
-    public Fragmentation getFragmentation() {
-        return this.fragmentation;
+    public void setCoinNumber(double coinNumber) {
+        this.coinNumber = coinNumber;
     }
 
-    public String getFragmentationID() {
-        return this.fragmentation.getID();
+    public String getFragmentationId() {
+        return fragmentationId;
+    }
+
+    public void setFragmentationId(String fragmentationId) {
+        this.fragmentationId = fragmentationId;
     }
 
     public int getLoad() {
         return load;
     }
 
+    public void setLoad(int load) {
+        this.load = load;
+    }
+
     public Map<String, Double> getUserExtraList() {
         return userExtraList;
     }
 
-    public void setUserExtraList(Map<String, Double> userExtraList) {this.userExtraList=userExtraList;}
+    public void setUserExtraList(Map<String, Double> userExtraList) {
+        this.userExtraList = userExtraList;
+    }
 
     public ArrayList<Trading> packageBlock() {
         return null;
@@ -75,7 +84,7 @@ public abstract class Node {
     @Override
     public String toString() {
         return "Node [ID=" + ID + ", block=" + block + ", coinNumber=" + coinNumber + ", fragmentationId="
-                + this.getFragmentationID() + ", load=" + load + ", userExtraList=" + userExtraList + "]";
+                + fragmentationId + ", load=" + load + ", userExtraList=" + userExtraList + "]";
     }
 
 }

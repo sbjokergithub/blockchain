@@ -34,7 +34,8 @@ public class BlockChain {
     }
 
     //add node, add user, add trading
-    public static void checkNum(StringTokenizer st) {
+    public static void checkNum(StringTokenizer st)
+    {
         st.hasMoreElements();
         String checkNum = (String) st.nextElement();
         //add user
@@ -45,10 +46,10 @@ public class BlockChain {
                 userInfo[j] = (String) st.nextElement();
             }
             Fragmentation fragmentation = fragmentationList.get(userInfo[1]);
-            OrdinaryNode node = (OrdinaryNode) fragmentation.bestNode();
-            User user = new User(userInfo[0], node, Double.parseDouble(userInfo[2]));
+//            OrdinaryNode node = fragmentation.bestNode();
+            User user = new User(userInfo[0], userInfo[1], Double.parseDouble(userInfo[2]));
             userList.put(user.getID(), user);
-            node.addUser(user);
+
             fragmentation.addUser(user);
         }
         //add trading
@@ -62,6 +63,7 @@ public class BlockChain {
             tradeTime = Timestamp.valueOf(tradeInfo[3] + " " + tradeInfo[4]);
             Trading trading = new Trading(tradeInfo[0], Double.parseDouble(tradeInfo[1]), tradeInfo[2], tradeTime);
             transaction.add(trading);
+
         }
         //add node
         if (checkNum.equals("2")) {
@@ -70,10 +72,8 @@ public class BlockChain {
                 st.hasMoreElements();
                 nodeInfo[j] = (String) st.nextElement();
             }
-            Fragmentation fragmentation = fragmentationList.get(nodeInfo[2]);
-            OrdinaryNode node = new OrdinaryNode(nodeInfo[0], Double.parseDouble(nodeInfo[1]), fragmentation, Integer.parseInt(nodeInfo[3]));
+            OrdinaryNode node = new OrdinaryNode(nodeInfo[0], Double.parseDouble(nodeInfo[1]), nodeInfo[2], Integer.parseInt(nodeInfo[3]));
             nodeList.put(node.getID(), node);
-            fragmentation.addNode(node);
         }
     }
 
