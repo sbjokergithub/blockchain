@@ -7,7 +7,7 @@ public class Fragmentation {
     private ArrayList<Node> nodeList;
     private ArrayList<User> userList;
     private ArrayList<Trading> transaction;
-    private String masterNode;
+    private Node masterNode;
 
     public Fragmentation(String ID) {
         this.ID = ID;
@@ -52,7 +52,7 @@ public class Fragmentation {
     }
 
     //How to select the representative nodes?
-    public String chooseMasterNode() {
+    public Node chooseMasterNode() {
         return null;
     }
 
@@ -73,5 +73,14 @@ public class Fragmentation {
         }
         return nodeList.get(i).getID();
     }
+    
+    //a fragmentation wants to fragmented 
+    public int tryFragment(double TPSpos) {
+    	if (nodeList.size()>=6 && transaction.size()>TPSpos)
+    		return transaction.size();
+    	else return 0;
+    }
+    
+    
 
 }

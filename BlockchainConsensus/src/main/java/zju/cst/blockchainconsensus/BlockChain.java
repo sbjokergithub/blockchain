@@ -16,6 +16,7 @@ public class BlockChain {
     private static Map<String, Node> nodeList;
     private static Map<String, User> userList;
     private static ArrayList<Trading> transaction;
+    private static Timestamp blockTime;
 
     //Randomly generate validation groups£¿
     public ArrayList<String> generateValidationGroups() {
@@ -32,7 +33,18 @@ public class BlockChain {
     public Boolean adjust(String str) {
         return false;
     }
-
+    
+    //generate a block
+    public static void generateBlock() {
+    	
+    }
+    
+    //judge which is large, nowTime or blockTime 
+    public static boolean timeOver(Timestamp nowTime, Timestamp blockTime) {
+    	if(nowTime.after(blockTime)) return true;
+    	return false;
+    }
+    
     //add node, add user, add trading
     public static void checkNum(StringTokenizer st) {
         st.hasMoreElements();
@@ -44,6 +56,8 @@ public class BlockChain {
                 st.hasMoreElements();
                 userInfo[j] = (String) st.nextElement();
             }
+            Timestamp nowTime = Timestamp.valueOf(userInfo[3] + " " + userInfo[4]);
+            if (timeOver(nowTime,blockTime)) generateBlock();
             Fragmentation fragmentation = fragmentationList.get(userInfo[1]);
             OrdinaryNode node = (OrdinaryNode) fragmentation.bestNode();
             User user = new User(userInfo[0], node, Double.parseDouble(userInfo[2]));
@@ -58,9 +72,8 @@ public class BlockChain {
                 st.hasMoreElements();
                 tradeInfo[k] = (String) st.nextElement();
             }
-            Timestamp tradeTime;
-            tradeTime = Timestamp.valueOf(tradeInfo[3] + " " + tradeInfo[4]);
-            Trading trading = new Trading(tradeInfo[0], Double.parseDouble(tradeInfo[1]), tradeInfo[2], tradeTime);
+            Timestamp nowTime = Timestamp.valueOf(tradeInfo[3] + " " + tradeInfo[4]);
+            Trading trading = new Trading(tradeInfo[0], Double.parseDouble(tradeInfo[1]), tradeInfo[2], nowTime);
             transaction.add(trading);
         }
         //add node
@@ -70,6 +83,7 @@ public class BlockChain {
                 st.hasMoreElements();
                 nodeInfo[j] = (String) st.nextElement();
             }
+            Timestamp nowTime = Timestamp.valueOf(nodeInfo[4] + " " + nodeInfo[5]);
             Fragmentation fragmentation = fragmentationList.get(nodeInfo[2]);
             OrdinaryNode node = new OrdinaryNode(nodeInfo[0], Double.parseDouble(nodeInfo[1]), fragmentation, Integer.parseInt(nodeInfo[3]));
             nodeList.put(node.getID(), node);
@@ -82,6 +96,7 @@ public class BlockChain {
         fragmentationList = new HashMap<String, Fragmentation>();
         nodeList = new HashMap<String, Node>();
         userList = new HashMap<String, User>();
+        blockTime = Timestamp.valueOf("2018-12-10 00:00:00");
 
         Fragmentation fragmentation = new Fragmentation("F000");
         fragmentationList.put(fragmentation.getID(), fragmentation);
