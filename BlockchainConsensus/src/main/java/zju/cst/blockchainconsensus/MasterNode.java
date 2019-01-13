@@ -5,8 +5,8 @@ import java.util.Map;
 
 public class MasterNode extends Node {
 	private ArrayList<Node> masterNode;
-    public MasterNode(String ID, double coinNumber, Fragmentation fragmentation, int load) {
-        super(ID, coinNumber, fragmentation, load);
+    public MasterNode(String ID, Fragmentation fragmentation) {
+        super(ID, fragmentation);
     }
 
     @Override

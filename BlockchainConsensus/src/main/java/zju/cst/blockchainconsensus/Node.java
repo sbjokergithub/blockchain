@@ -12,11 +12,9 @@ public abstract class Node {
     public Map<String, Double> userExtraList;
     public ArrayList<User> myUser;
 
-    public Node(String ID, double coinNumber, Fragmentation fragmentation, int load) {
+    public Node(String ID, Fragmentation fragmentation) {
         this.ID = ID;
-        this.coinNumber = coinNumber;
         this.fragmentation = fragmentation;
-        this.load = load;
         this.myUser = new ArrayList<User>();
     }
 
@@ -47,6 +45,10 @@ public abstract class Node {
 
     public String getFragmentationID() {
         return this.fragmentation.getID();
+    }
+    
+    public void setFragment(Fragmentation newfragment) {
+    	this.fragmentation = newfragment;
     }
 
     public int getLoad() {

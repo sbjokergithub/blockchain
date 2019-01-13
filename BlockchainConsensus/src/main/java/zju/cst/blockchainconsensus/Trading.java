@@ -7,6 +7,8 @@ public class Trading {
     private double transactionAmount;
     private String transactionReceiver;
     private Timestamp time;
+    private User sender;
+    private User receiver;
 
     public Trading(String transactionSender, double transactionAmount, String transactionReceiver, Timestamp time) {
         this.transactionSender = transactionSender;
@@ -25,6 +27,14 @@ public class Trading {
 
     public String getTransactionReceiver() {
         return transactionReceiver;
+    }
+    
+    public User userGetSender() {
+    	return sender;
+    }
+    
+    public User userGetReceiver() {
+    	return receiver;
     }
 
     public Timestamp getTime() {

@@ -6,8 +6,8 @@ import java.util.Map;
 public class OrdinaryNode extends Node {
 	private ArrayList<Node> ordinaryNode;
 	private ArrayList<Node> masterNode;
-    public OrdinaryNode(String ID, double coinNumber, Fragmentation fragmentation, int load) {
-        super(ID, coinNumber, fragmentation, load);
+    public OrdinaryNode(String ID, Fragmentation fragmentation) {
+        super(ID, fragmentation);
     }
 
     @Override

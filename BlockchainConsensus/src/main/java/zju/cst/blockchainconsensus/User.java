@@ -35,6 +35,11 @@ public class User {
         return this.getFragmentation().getID();
     }
 
+    //change node
+    public void setNode(Node node){
+    	this.node = node;
+    }
+    
     public double getChargeAccount() {
         return chargeAccount;
     }
