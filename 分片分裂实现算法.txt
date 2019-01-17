@@ -1,0 +1,45 @@
+
+public class Main {
+    static int[][] transaction;
+    //随机产生交易数据
+    public static int[][] randomTransation (int n){
+    	transaction = new int[n][n];
+		for(int i = 0;i < n;i++) {
+			for(int j = i + 1;j < n;j++) {
+				int rand = (int) (100*Math.random());
+				transaction[i][j] = rand;
+				transaction[j][i] = rand; 
+			}
+		}
+		return null;
+	}
+  //打印邻接矩阵
+  	public static void printRoad(int[][] road) {
+  		for(int i = 0;i < road.length;i ++) {
+  			for(int j = 0;j < road.length;j++) {
+  				System.out.print(road[i][j] +"," );
+  			}
+  			System.out.println();
+  		}
+  		System.out.println();
+  	}
+  	//a和b分别存储两个分片的ID，返回两个分片的割
+  	public static int maxFlow(int[] a,int[] b) {
+  		int answer = 0;
+  		for(int i = 0;i < a.length;i ++) {
+  			for(int j = 0;j < b.length;j++) {
+  				answer = answer + transaction[a[i]][b[j]];
+  			}
+  		}
+  		return answer;
+  	}
+  	public static void main(String[] args) {
+  		randomTransation(4);
+  		printRoad(transaction);
+  		//需要遍历分片列表，取其中的用户列表转换为下面的ID值
+  		int[] a = {0,1};
+  		int[] b = {2,3};
+  		//找出最大割的分片合并，max(maxFlow(a,b)) 
+  	}
+  	
+}
