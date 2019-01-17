@@ -12,43 +12,46 @@ import java.util.StringTokenizer;
 import static javax.swing.UIManager.put;
 
 public class BlockChain {
-    private static Map<String, Fragmentation> fragmentationList;
-    private static Map<String, Node> nodeList;
-    private static Map<String, User> userList;
-    private static ArrayList<Trading> transaction;
-    private static Timestamp blockTime;
-    private static int consenseNum;
-    private static int[][] dis;
+	private static Map<String, Fragmentation> fragmentationList;
+	private static Map<String, Node> nodeList;
+	private static Map<String, User> userList;
+	private static ArrayList<Trading> transaction;
+	private static Map<String, Double> userAccount;
+	private static Timestamp blockTime;
+	private static int consenseNum;
+	private static int[][] dis;
 
-    //Randomly generate validation groups？
-    public ArrayList<String> generateValidationGroups() {
+	// Randomly generate validation groups？
+	public ArrayList<String> generateValidationGroups() {
 
-        return null;
-    }
+		return null;
+	}
 
-    //The reserved interface
-    public void fragmentationManagement() {
+	// The reserved interface
+	public void fragmentationManagement() {
 
-    }
+	}
 
-    //How is shading managed？
-    public Boolean adjust(String str) {
-        return false;
-    }
-    
-    //find the number of new fragmentation
-    public static int getNewFragmentationNumber() {
-    	int j = 0;
-    	Integer p;
-    	while (true) {
-    		p = j;
-    		if (fragmentationList.get(p) == null) return j;
-    		else j++;
-    	}
+	// How is shading managed？
+	public Boolean adjust(String str) {
+		return false;
+	}
 
-    }
-    
-    //choose a fragment to split
+	// find the number of new fragmentation
+	public static int getNewFragmentationNumber() {
+		int j = 0;
+		Integer p;
+		while (true) {
+			p = j;
+			if (fragmentationList.get(p) == null)
+				return j;
+			else
+				j++;
+		}
+
+	}
+
+	// choose a fragment to split
 //    public static int chooseFragmentation() {
 //    	int n = 0, m = 0;
 //    	for (Map.Entry<Integer, Fragmentation> entry : fragmentationList.entrySet()) { 
@@ -61,27 +64,25 @@ public class BlockChain {
 //    	if (n > 0) return m;
 //    	else return -1;
 //    }
-    
-    //generate a block
-    public static void generateBlock() {
-    	
-    	
-    	
-    	//after generate a block, a fragmentation adjustment must be down
+
+	// generate a block
+	public static void generateBlock() {
+
+		// after generate a block, a fragmentation adjustment must be down
 //    	adjustFragment();
-    }
-    
-    //if the system can split fragment
-    public static boolean splitFragment() {
-    	return true;
-    }
-    
-    //if the system should merge fragment
-    public static boolean mergeFragment() {
-    	return true;
-    }
-    
-    //adjust fragment
+	}
+
+	// if the system can split fragment
+	public static boolean splitFragment() {
+		return true;
+	}
+
+	// if the system should merge fragment
+	public static boolean mergeFragment() {
+		return true;
+	}
+
+	// adjust fragment
 //    public static void adjustFragment() {
 //    	if (consenseNum == 10) {
 //    		//fragmentation splitting and merging
@@ -109,13 +110,14 @@ public class BlockChain {
 //    		consenseNum++;
 //    	}
 //    }
-    
-    //judge which is large, nowTime or blockTime 
-    public static boolean timeOver(Timestamp nowTime, Timestamp blockTime) {
-    	if(nowTime.after(blockTime)) return true;
-    	return false;
-    }
-    
+
+	// judge which is large, nowTime or blockTime
+	public static boolean timeOver(Timestamp nowTime, Timestamp blockTime) {
+		if (nowTime.after(blockTime))
+			return true;
+		return false;
+	}
+
 //    //add node, add user, add trading
 //    public static void checkNum(StringTokenizer st) {
 //        st.hasMoreElements();
@@ -166,186 +168,180 @@ public class BlockChain {
 ////            fragmentation.addNode(node);
 //        }
 //    }
-    
-  public static void Initialize() {
-	  ArrayList<String> arrayList0 = new ArrayList<String>();
-      ArrayList<String> arrayList1 = new ArrayList<String>();
-      ArrayList<String> arrayList2 = new ArrayList<String>();
-      ArrayList<String> arrayList3 = new ArrayList<String>();
-      ArrayList<String> arrayList4 = new ArrayList<String>();
-      try {
-          FileReader fr0 = new FileReader("E:/blockchainconsensus/blockchain/tradingpool.txt");
-          BufferedReader bf0 = new BufferedReader(fr0);
-          String str0;
-          while ((str0 = bf0.readLine()) != null) arrayList0.add(str0);
-          bf0.close();
-          fr0.close();
-          
-          FileReader fr1 = new FileReader("E:/blockchainconsensus/blockchain/tradingpool.txt");
-          BufferedReader bf1 = new BufferedReader(fr1);
-          String str1;
-          while ((str1 = bf1.readLine()) != null) arrayList1.add(str1);
-          bf1.close();
-          fr1.close();
-          
-          FileReader fr2 = new FileReader("E:/blockchainconsensus/blockchain/tradingpool.txt");
-          BufferedReader bf2 = new BufferedReader(fr2);
-          String str2;
-          while ((str2 = bf2.readLine()) != null) arrayList2.add(str2);
-          bf2.close();
-          fr2.close();
-          
-          FileReader fr3 = new FileReader("E:/blockchainconsensus/blockchain/tradingpool.txt");
-          BufferedReader bf3 = new BufferedReader(fr3);
-          String str3;
-          while ((str3 = bf3.readLine()) != null) arrayList3.add(str3);
-          bf3.close();
-          fr3.close();
-          
-          FileReader fr4 = new FileReader("E:/blockchainconsensus/blockchain/tradingpool.txt");
-          BufferedReader bf4 = new BufferedReader(fr4);
-          String str4;
-          while ((str4 = bf4.readLine()) != null) arrayList4.add(str4);
-          bf4.close();
-          fr4.close();
-          
-      } catch (IOException e) {
-          e.printStackTrace();
-      }     
-      
-      for (int i = 0; i < arrayList0.size(); i++) {
-          String s = arrayList0.get(i);
-          StringTokenizer st = new StringTokenizer(s, ",!' '.;");
-          String[] myInfo = new String[2];
-          for (int j = 0; j < 2; j++) {
-              st.hasMoreElements();
-              myInfo[j] = (String) st.nextElement();
-          }         
-          Fragmentation fragmentation = new Fragmentation(myInfo[0],myInfo[1]);
-          fragmentationList.put(myInfo[0],fragmentation);
-      }
+	public static int[][] floydWarshall(int[][] road) {
+		int n = road.length;
 
-      for (int i = 0; i < arrayList1.size(); i++) {
-          String s = arrayList1.get(i);
-          StringTokenizer st = new StringTokenizer(s, ",!' '.;");
-          String[] myInfo = new String[2];
-          for (int j = 0; j < 2; j++) {
-              st.hasMoreElements();
-              myInfo[j] = (String) st.nextElement();
-          }         
-          Fragmentation fragmentation = fragmentationList.get(myInfo[1]);
-		  if (myInfo[0].equals(fragmentation.getMasterNodeID())) {
-        	  MasterNode node = new MasterNode(myInfo[0], fragmentation);
-        	  fragmentation.setMasterNode(node);
-        	  nodeList.put(myInfo[0],node);
-          }
-          else {
-        	  OrdinaryNode node = new OrdinaryNode(myInfo[0], fragmentation);
-        	  nodeList.put(myInfo[0],node);
-          }
-      }     
-      
-      for (int i = 0; i < arrayList2.size(); i++) {
-          String s = arrayList2.get(i);
-          StringTokenizer st = new StringTokenizer(s, ",!' '.;");
-          String[] myInfo = new String[3];
-          for (int j = 0; j < 3; j++) {
-              st.hasMoreElements();
-              myInfo[j] = (String) st.nextElement();
-          }         
-          Node node = nodeList.get(myInfo[1]);
-          User user = new User(myInfo[0], node, Integer.parseInt(myInfo[2]));
-          userList.put(myInfo[0], user);
-      }    
-      
-      for (int i = 0; i < arrayList3.size(); i++) {
-          String s = arrayList3.get(i);
-          StringTokenizer st = new StringTokenizer(s, ",!' '.;");
-          String[] myInfo = new String[3];
-          for (int j = 0; j < 3; j++) {
-              st.hasMoreElements();
-              myInfo[j] = (String) st.nextElement();
-          }         
-          dis = new int[nodeList.size()][nodeList.size()];
-          int k0 = Integer.parseInt(myInfo[0]);
-          int k1 = Integer.parseInt(myInfo[1]);
-          int k2 = Integer.parseInt(myInfo[2]);
-          dis[k0][k1] = k2;
-          dis[k1][k0] = k2;
-      }         
-      
-      for (int i = 0; i < arrayList4.size(); i++) {
-          String s = arrayList4.get(i);
-          StringTokenizer st = new StringTokenizer(s, ",!' '.;");
-          String[] myInfo = new String[5];
-          for (int j = 0; j < 5; j++) {
-              st.hasMoreElements();
-              myInfo[j] = (String) st.nextElement();
-          }         
-          int money = Integer.parseInt(myInfo[2]);
-          Timestamp time = Timestamp.valueOf(myInfo[3] + " " + myInfo[4]);
-          Trading trade = new Trading(myInfo[0], money, myInfo[1], time);
-          transaction.add(trade);
-      }      
-  }
-    
-    
-  public static void main(String[] args) {  
-      fragmentationList = new HashMap<String, Fragmentation>();
-      nodeList = new HashMap<String, Node>();
-      userList = new HashMap<String, User>();
-      transaction = new ArrayList<Trading>();
+		for (int i = 0; i < road.length; i++) {
+			for (int j = i + 1; j < n; j++) {
+				if (road[i][j] == 0) {
+					road[i][j] = 1000;
+					road[j][i] = 1000;
+				}
+			}
+		}
+		for (int k = 0; k < n; k++) {
+			for (int i = 0; i < n; i++) {
+				for (int j = i + 1; j < n; j++) {
+					// 这里采取的是加入中间点K的做法，因此不用一次循环
+					road[i][j] = road[j][i] = Math.min(road[i][j], road[i][k] + road[k][j]);
+				}
+			}
+		}
+		return road;
+	}
 
-      Initialize();
-      
-      
-      
-      
-      
-      
+	public static void dropWrongTrade() {
+		for (int i=transaction.size()-1; i>=0; i--) {
+			Trading trade = transaction.get(i);
+			if (!userList.containsKey(trade.getTransactionSender()) || !userList.containsKey(trade.getTransactionReceiver())) transaction.remove(i);
+			else {
+				if (trade.getTransactionAmount() > userAccount.get(trade.getTransactionSender())) transaction.remove(i);
+			}
+		}
+		
+		
+		
+	}
 
-  }
-  
-    //
-//    public static void main(String[] args) {
-//        fragmentationList = new HashMap<Integer, Fragmentation>();
-//        nodeList = new HashMap<String, Node>();
-//        userList = new HashMap<String, User>();
-//        blockTime = Timestamp.valueOf("2018-12-10 00:00:00");
-//        consenseNum = 0;
-//
-//        Fragmentation fragmentation = new Fragmentation(0);
-//        fragmentationList.put(fragmentation.getID(), fragmentation);
-//
-//        //Reads transaction information from a text document
-//        ArrayList<String> arrayList = new ArrayList<String>();
-//        transaction = new ArrayList<Trading>();
-//        try {
-//            FileReader fr = new FileReader("E:/blockchainconsensus/blockchain/tradingpool.txt");
-//            BufferedReader bf = new BufferedReader(fr);
-//            String str;
-//            while ((str = bf.readLine()) != null) {
-//                arrayList.add(str);
-//            }
-//            bf.close();
-//            fr.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        int length = arrayList.size();
-//        for (int i = 0; i < length; i++) {
-//            String s = arrayList.get(i);
-//            StringTokenizer st = new StringTokenizer(s, ",!' '.;");
-//
-//            checkNum(st);
-//
-//        }
-//
-//        for (int i = 0; i < transaction.size(); i++) {
-//
-//            System.out.println(transaction.get(i));
-//        }
-//
-//    }
+	public static void Initialize() {
+		ArrayList<String> arrayList0 = new ArrayList<String>();
+		ArrayList<String> arrayList1 = new ArrayList<String>();
+		ArrayList<String> arrayList2 = new ArrayList<String>();
+		ArrayList<String> arrayList3 = new ArrayList<String>();
+		ArrayList<String> arrayList4 = new ArrayList<String>();
+		try {
+			FileReader fr0 = new FileReader("C:/Users/73162/git/blockchain/data/Table0.txt");
+			BufferedReader bf0 = new BufferedReader(fr0);
+			String str0;
+			while ((str0 = bf0.readLine()) != null)
+				arrayList0.add(str0);
+			bf0.close();
+			fr0.close();
+
+			FileReader fr1 = new FileReader("C:/Users/73162/git/blockchain/data/Table1.txt");
+			BufferedReader bf1 = new BufferedReader(fr1);
+			String str1;
+			while ((str1 = bf1.readLine()) != null)
+				arrayList1.add(str1);
+			bf1.close();
+			fr1.close();
+
+			FileReader fr2 = new FileReader("C:/Users/73162/git/blockchain/data/Table2.txt");
+			BufferedReader bf2 = new BufferedReader(fr2);
+			String str2;
+			while ((str2 = bf2.readLine()) != null)
+				arrayList2.add(str2);
+			bf2.close();
+			fr2.close();
+
+			FileReader fr3 = new FileReader("C:/Users/73162/git/blockchain/data/Table3.txt");
+			BufferedReader bf3 = new BufferedReader(fr3);
+			String str3;
+			while ((str3 = bf3.readLine()) != null)
+				arrayList3.add(str3);
+			bf3.close();
+			fr3.close();
+
+			FileReader fr4 = new FileReader("C:/Users/73162/git/blockchain/data/trading.txt");
+			BufferedReader bf4 = new BufferedReader(fr4);
+			String str4;
+			while ((str4 = bf4.readLine()) != null)
+				arrayList4.add(str4);
+			bf4.close();
+			fr4.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		for (int i = 0; i < arrayList0.size(); i++) {
+			String s = arrayList0.get(i);
+			StringTokenizer st = new StringTokenizer(s, ",!' '.;");
+			String[] myInfo = new String[2];
+			for (int j = 0; j < 2; j++) {
+				st.hasMoreElements();
+				myInfo[j] = (String) st.nextElement();
+			}
+			Fragmentation fragmentation = new Fragmentation(myInfo[0], myInfo[1]);
+			fragmentationList.put(myInfo[0], fragmentation);
+		}
+
+		for (int i = 0; i < arrayList1.size(); i++) {
+			String s = arrayList1.get(i);
+			StringTokenizer st = new StringTokenizer(s, ",!' '.;");
+			String[] myInfo = new String[2];
+			for (int j = 0; j < 2; j++) {
+				st.hasMoreElements();
+				myInfo[j] = (String) st.nextElement();
+			}
+			Fragmentation fragmentation = fragmentationList.get(myInfo[1]);
+			if (myInfo[0].equals(fragmentation.getMasterNodeID())) {
+				MasterNode node = new MasterNode(myInfo[0], fragmentation);
+				fragmentation.setMasterNode(node);
+				nodeList.put(myInfo[0], node);
+			} else {
+				OrdinaryNode node = new OrdinaryNode(myInfo[0], fragmentation);
+				nodeList.put(myInfo[0], node);
+			}
+		}
+
+		for (int i = 0; i < arrayList2.size(); i++) {
+			String s = arrayList2.get(i);
+			StringTokenizer st = new StringTokenizer(s, ",!' '.;");
+			String[] myInfo = new String[3];
+			for (int j = 0; j < 3; j++) {
+				st.hasMoreElements();
+				myInfo[j] = (String) st.nextElement();
+			}
+			Node node = nodeList.get(myInfo[1]);
+			User user = new User(myInfo[0], node, Double.parseDouble(myInfo[2]));
+			userList.put(myInfo[0], user);
+			userAccount.put(myInfo[0], Double.parseDouble(myInfo[2]));
+		}
+
+		for (int i = 0; i < arrayList3.size(); i++) {
+			String s = arrayList3.get(i);
+			StringTokenizer st = new StringTokenizer(s, ",!' '.;");
+			String[] myInfo = new String[3];
+			for (int j = 0; j < 3; j++) {
+				st.hasMoreElements();
+				myInfo[j] = (String) st.nextElement();
+			}
+			dis = new int[nodeList.size()][nodeList.size()];
+			int k0 = Integer.parseInt(myInfo[0]);
+			int k1 = Integer.parseInt(myInfo[1]);
+			int k2 = Integer.parseInt(myInfo[2]);
+			dis[k0][k1] = k2;
+			dis[k1][k0] = k2;
+		}
+
+		for (int i = 0; i < arrayList4.size(); i++) {
+			String s = arrayList4.get(i);
+			StringTokenizer st = new StringTokenizer(s, ",!' '.;");
+			String[] myInfo = new String[5];
+			for (int j = 0; j < 5; j++) {
+				st.hasMoreElements();
+				myInfo[j] = (String) st.nextElement();
+			}
+			int money = Integer.parseInt(myInfo[2]);
+			Timestamp time = Timestamp.valueOf(myInfo[3] + " " + myInfo[4]);
+			Trading trade = new Trading(myInfo[0], money, myInfo[1], time);
+			transaction.add(trade);
+		}
+	}
+
+	public static void main(String[] args) {
+		fragmentationList = new HashMap<String, Fragmentation>();
+		nodeList = new HashMap<String, Node>();
+		userList = new HashMap<String, User>();
+		transaction = new ArrayList<Trading>();
+		userAccount = new HashMap<String, Double>();
+
+		Initialize();
+		dis = floydWarshall(dis);
+
+		dropWrongTrade();
+
+	}
+
 }
