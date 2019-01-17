@@ -1,0 +1,12 @@
+0 OrdinaryNode0 10 fragmentation0 10
+1 OrdinaryNode1 10 fragmentation0 10
+1 OrdinaryNode2 10 fragmentation0 10
+0 OrdinaryNode3 10 fragmentation1 10
+1 OrdinaryNode4 10 fragmentation1 10
+1 OrdinaryNode5 10 fragmentation1 10
+0 OrdinaryNode6 10 fragmentation2 10
+1 OrdinaryNode7 10 fragmentation2 10
+1 OrdinaryNode8 10 fragmentation2 10
+0 OrdinaryNode9 10 fragmentation3 10
+1 OrdinaryNode10 10 fragmentation3 10
+1 OrdinaryNode11 10 fragmentation3 10

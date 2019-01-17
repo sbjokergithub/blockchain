@@ -1,0 +1,12 @@
+fragmentation0 OrdinaryNode0
+fragmentation0 OrdinaryNode1
+fragmentation0 OrdinaryNode2
+fragmentation1 OrdinaryNode3
+fragmentation1 OrdinaryNode4
+fragmentation1 OrdinaryNode5
+fragmentation2 OrdinaryNode6
+fragmentation2 OrdinaryNode7
+fragmentation2 OrdinaryNode8
+fragmentation3 OrdinaryNode9
+fragmentation3 OrdinaryNode10
+fragmentation3 OrdinaryNode11
