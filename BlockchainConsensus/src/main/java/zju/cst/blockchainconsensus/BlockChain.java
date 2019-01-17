@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import javax.swing.text.html.HTMLDocument.Iterator;
+
 import static javax.swing.UIManager.put;
 
 public class BlockChain {
@@ -20,6 +22,7 @@ public class BlockChain {
 	private static Timestamp blockTime;
 	private static int consenseNum;
 	private static int[][] dis;
+	private static Node pbftMasterNode;
 
 	// Randomly generate validation groups？
 	public ArrayList<String> generateValidationGroups() {
@@ -118,56 +121,6 @@ public class BlockChain {
 		return false;
 	}
 
-//    //add node, add user, add trading
-//    public static void checkNum(StringTokenizer st) {
-//        st.hasMoreElements();
-//        String checkNum = (String) st.nextElement();
-//        //add user
-//        if (checkNum.equals("0")) {
-//            String[] userInfo = new String[5];
-//            for (int j = 0; j < 5; j++) {
-//                st.hasMoreElements();
-//                userInfo[j] = (String) st.nextElement();
-//            }
-//            Timestamp nowTime = Timestamp.valueOf(userInfo[3] + " " + userInfo[4]);
-//            if (timeOver(nowTime,blockTime)) generateBlock();
-//            
-//            Fragmentation fragmentation = fragmentationList.get(Integer.parseInt(userInfo[1]));
-//            OrdinaryNode node = (OrdinaryNode) fragmentation.bestNode();
-//            User user = new User(userInfo[0], node, Double.parseDouble(userInfo[2]));
-//            userList.put(user.getID(), user);
-//            node.addUser(user);
-//            fragmentation.addUser(user);
-//        }
-//        //add trading
-//        if (checkNum.equals("1")) {
-//            String[] tradeInfo = new String[5];
-//            for (int k = 0; k < 5; k++) {
-//                st.hasMoreElements();
-//                tradeInfo[k] = (String) st.nextElement();
-//            }
-//            Timestamp nowTime = Timestamp.valueOf(tradeInfo[3] + " " + tradeInfo[4]);
-//            if (timeOver(nowTime,blockTime)) generateBlock();
-//            
-//            Trading trading = new Trading(tradeInfo[0], Double.parseDouble(tradeInfo[1]), tradeInfo[2], nowTime);
-//            transaction.add(trading);
-//        }
-//        //add node
-//        if (checkNum.equals("2")) {
-//            String[] nodeInfo = new String[6];
-//            for (int j = 0; j < 6; j++) {
-//                st.hasMoreElements();
-//                nodeInfo[j] = (String) st.nextElement();
-//            }
-//            Timestamp nowTime = Timestamp.valueOf(nodeInfo[4] + " " + nodeInfo[5]);
-//            if (timeOver(nowTime,blockTime)) generateBlock();
-//            
-//            Fragmentation fragmentation = fragmentationList.get(Integer.parseInt(nodeInfo[2]));
-////            OrdinaryNode node = new OrdinaryNode(nodeInfo[0], Double.parseDouble(nodeInfo[1]), fragmentation, Integer.parseInt(nodeInfo[3]));
-////            nodeList.put(node.getID(), node);
-////            fragmentation.addNode(node);
-//        }
-//    }
 	public static int[][] floydWarshall(int[][] road) {
 		int n = road.length;
 
@@ -182,7 +135,6 @@ public class BlockChain {
 		for (int k = 0; k < n; k++) {
 			for (int i = 0; i < n; i++) {
 				for (int j = i + 1; j < n; j++) {
-					// 这里采取的是加入中间点K的做法，因此不用一次循环
 					road[i][j] = road[j][i] = Math.min(road[i][j], road[i][k] + road[k][j]);
 				}
 			}
@@ -190,17 +142,65 @@ public class BlockChain {
 		return road;
 	}
 
-	public static void dropWrongTrade() {
-		for (int i=transaction.size()-1; i>=0; i--) {
+	public static void dropDoubleTrade() {
+		ArrayList<Trading> tempTransaction = new ArrayList<Trading>();
+		for (int i = 0; i < transaction.size(); ++i) {
 			Trading trade = transaction.get(i);
-			if (!userList.containsKey(trade.getTransactionSender()) || !userList.containsKey(trade.getTransactionReceiver())) transaction.remove(i);
+			User sender = userList.get(trade.getTransactionSender());
+			User receiver = userList.get(trade.getTransactionReceiver());
+			if (sender.getFragmentationID().equals(receiver.getFragmentationID())) {
+				Fragmentation fragmention = sender.getFragmentation();
+				fragmention.addTransaction(trade);
+				tempTransaction.add(trade);
+				transaction.remove(i--);
+			}
+		}
+
+		for (int i = 0; i < tempTransaction.size(); ++i) {
+			Trading trade = tempTransaction.get(i);
+			User sender = userList.get(trade.getTransactionSender());
+			Double money = userAccount.get(sender.getID());
+			if (money >= trade.getTransactionAmount()) {
+				userAccount.put(sender.getID(), money - trade.getTransactionAmount());
+			}
+		}
+
+		for (int i = 0; i < transaction.size(); ++i) {
+			Trading trade = transaction.get(i);
+			User sender = userList.get(trade.getTransactionSender());
+			Double money = userAccount.get(sender.getID());
+			if (money >= trade.getTransactionAmount()) {
+				userAccount.put(sender.getID(), money - trade.getTransactionAmount());
+			}
 			else {
-				if (trade.getTransactionAmount() > userAccount.get(trade.getTransactionSender())) transaction.remove(i);
+				transaction.remove(i--);
 			}
 		}
 		
-		
-		
+
+	}
+
+	public static void dropWrongTrade() {
+		for (int i = transaction.size() - 1; i >= 0; i--) {
+			Trading trade = transaction.get(i);
+			if (!userList.containsKey(trade.getTransactionSender())
+					|| !userList.containsKey(trade.getTransactionReceiver())) {
+				transaction.remove(i);
+			} else {
+				if (trade.getTransactionAmount() > userAccount.get(trade.getTransactionSender()))
+					transaction.remove(i);
+			}
+		}
+
+	}
+
+	public static void updateLocalUserAccount() {
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragmentation = entry.getValue();
+			fragmentation.setLocalAccount();
+			// System.out.println("Key = " + entry.getKey() + ", Value = " +
+			// entry.getValue());
+		}
 	}
 
 	public static void Initialize() {
@@ -279,9 +279,11 @@ public class BlockChain {
 				MasterNode node = new MasterNode(myInfo[0], fragmentation);
 				fragmentation.setMasterNode(node);
 				nodeList.put(myInfo[0], node);
+				fragmentation.addNode(node);
 			} else {
 				OrdinaryNode node = new OrdinaryNode(myInfo[0], fragmentation);
 				nodeList.put(myInfo[0], node);
+				fragmentation.addNode(node);
 			}
 		}
 
@@ -297,6 +299,9 @@ public class BlockChain {
 			User user = new User(myInfo[0], node, Double.parseDouble(myInfo[2]));
 			userList.put(myInfo[0], user);
 			userAccount.put(myInfo[0], Double.parseDouble(myInfo[2]));
+			node.addUser(user);
+			Fragmentation fragmentation = node.getFragmentation();
+			fragmentation.addUser(user);
 		}
 
 		for (int i = 0; i < arrayList3.size(); i++) {
@@ -341,7 +346,13 @@ public class BlockChain {
 		dis = floydWarshall(dis);
 
 		dropWrongTrade();
+		updateLocalUserAccount();
+		dropDoubleTrade();
 
+//		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) { 
+//			Fragmentation fragmentation = entry.getValue();
+//			fragmentation.printUserAccount();
+//		}
 	}
 
 }
