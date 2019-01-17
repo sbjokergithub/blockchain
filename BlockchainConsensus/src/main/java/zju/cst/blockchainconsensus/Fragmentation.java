@@ -12,7 +12,11 @@ public class Fragmentation {
     private Map<String, Integer> pos;
     private Node masterNode;
     private String masterNodeID;
+<<<<<<< HEAD
     private Node posNode ;
+=======
+	private Map<String, Double> localUserAccount;
+>>>>>>> c92d71ee602d82054007dacd34d10ad668f63268
 
     public Fragmentation(String ID, String nodeID) {
         this.ID = ID;
@@ -21,8 +25,23 @@ public class Fragmentation {
         this.nodeList = new ArrayList<Node>();
         this.transaction = new ArrayList<Trading>();
         this.pos = new HashMap<String, Integer>();
+        this.localUserAccount = new HashMap<String, Double>();
     }
 
+    public void printUserAccount(){
+    	System.out.println(this.ID);	
+		for (Map.Entry<String, Double> entry : this.localUserAccount.entrySet()) { 
+			  System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue()); 
+			}
+    }
+    
+    public void setLocalAccount() {
+    	for (int i=0; i<userList.size(); ++i) {
+    		User user = userList.get(i);
+    		this.localUserAccount.put(user.getID(), user.getChargeAccount());
+    	}
+    }
+    
     public void userConfirm() {
     	for (int i = userList.size()-1; i>=0; --i) {
     		User user = userList.get(i);
