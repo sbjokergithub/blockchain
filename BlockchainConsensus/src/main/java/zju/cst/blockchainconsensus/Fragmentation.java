@@ -12,6 +12,7 @@ public class Fragmentation {
     private Map<String, Integer> pos;
     private Node masterNode;
     private String masterNodeID;
+    private Node posNode ;
 
     public Fragmentation(String ID, String nodeID) {
         this.ID = ID;
