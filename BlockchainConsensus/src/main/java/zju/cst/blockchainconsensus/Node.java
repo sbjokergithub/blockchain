@@ -30,6 +30,10 @@ public abstract class Node {
         this.myUser.add(user);
     }
 
+    public void deleteUser(User user) {
+        this.myUser.remove(user);
+    }
+    
     //the user number in this node
     public int getUserNumber() {
     	return this.myUser.size();

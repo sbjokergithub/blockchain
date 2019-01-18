@@ -2,7 +2,7 @@ package zju.cst.blockchainconsensus;
 
 public class User {
     private String ID;
-    private Node node;
+    public Node node;
     private double chargeAccount;
 
     public User(String ID, Node node, double chargeAccount) {
@@ -11,6 +11,14 @@ public class User {
         this.chargeAccount = chargeAccount;
     }
 
+    public void minusMoney(double money) {
+		this.chargeAccount -= money;
+	}
+    
+    public void addMoney(double money) {
+    	this.chargeAccount += money;
+    }
+    
     public String getID() {
         return ID;
     }

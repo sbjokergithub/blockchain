@@ -13,16 +13,38 @@ import javax.swing.text.html.HTMLDocument.Iterator;
 
 import static javax.swing.UIManager.put;
 
+//一个用户作为发送方所涉及的所有交易及其交易次数
+class UserTx {
+	public String userId;
+	// 跨分片交易
+	public Map<String, Integer> outTx; // 分片ID，交易次数
+	public String outFragId; // 接收方所在交易分片ID
+	public int maxTimes; // 最大跨片交易次数
+	// 片内交易
+	public String inFragId; // 发送方所在交易分片ID
+	public int times; // 片内交易次数
+	// public double proportion; //maxTimes/times
+};
+
 public class BlockChain {
-	private static Map<String, Fragmentation> fragmentationList;
+	public static Map<String, Fragmentation> fragmentationList;
 	private static Map<String, Node> nodeList;
 	private static Map<String, User> userList;
 	private static ArrayList<Trading> transaction;
 	private static Map<String, Double> userAccount;
+	public static Map<String, Double> pbftUserAccount;
 	private static Timestamp blockTime;
 	private static int consenseNum;
-	private static int[][] dis;
+	public static int[][] dis;
 	private static Node pbftMasterNode;
+	private static ArrayList<Trading> finalTransaction;// 主链最后交易池
+	private static long timePOS, timePBFT;
+	private static Map<String, String> pbftHashMap;
+	public static Map<String, String> tradeHashMap;
+	static int commit;
+	public static Block masterBlock;
+	private static Fragmentation pbftAnswerFragment;
+	private static int[][] graph;
 
 	// Randomly generate validation groups？
 	public ArrayList<String> generateValidationGroups() {
@@ -55,18 +77,23 @@ public class BlockChain {
 	}
 
 	// choose a fragment to split
-//    public static int chooseFragmentation() {
-//    	int n = 0, m = 0;
-//    	for (Map.Entry<Integer, Fragmentation> entry : fragmentationList.entrySet()) { 
-//    		int i = entry.getKey().intValue();
-//    		Fragmentation fragment = entry.getValue();
-//    		int TPSpos = 500;
-//    		int s = fragment.tryFragment(TPSpos); 
-//    		if (s > n) {n = s; m = i;}
-//    	}
-//    	if (n > 0) return m;
-//    	else return -1;
-//    }
+	public static int chooseFragmentation() {
+		int n = 0, m = 0;
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			int i = Integer.parseInt(entry.getKey());
+			Fragmentation fragment = entry.getValue();
+			int TPSpos = 500;
+			int s = fragment.tryFragment(TPSpos);
+			if (s > n) {
+				n = s;
+				m = i;
+			}
+		}
+		if (n > 0)
+			return m;
+		else
+			return -1;
+	}
 
 	// generate a block
 	public static void generateBlock() {
@@ -77,48 +104,173 @@ public class BlockChain {
 
 	// if the system can split fragment
 	public static boolean splitFragment() {
-		return true;
+		if (timePOS > timePBFT)
+			return true;
+		else
+			return false;
 	}
 
 	// if the system should merge fragment
 	public static boolean mergeFragment() {
-		return true;
+		if (timePOS < timePBFT)
+			return true;
+		else
+			return false;
 	}
 
 	// adjust fragment
-//    public static void adjustFragment() {
-//    	if (consenseNum == 10) {
-//    		//fragmentation splitting and merging
-//    		if (splitFragment()) {
-//    			Integer k = chooseFragmentation();
-//    			if (k.intValue() != -1) 
-//    			{
-//    			    int l = getNewFragmentationNumber();
-//    	            Fragmentation newfragmentation = new Fragmentation(l);
-//    	            fragmentationList.put(newfragmentation.getID(), newfragmentation);  
-//    	        	Fragmentation fragmentation = fragmentationList.get(k);
-//    	        	
-//    	            ArrayList<Trading> newTransation = fragmentation.implementation(newfragmentation);
-//    	            for (int i=0; i<newTransation.size(); ++i) transaction.add(newTransation.get(i));
-//    	        }
-//    		}
-//    		else if (mergeFragment()) {
-//    			
-//    		}
-//    		consenseNum = 0;
-//    	}
-//    	else {
-//    		//Node join and quit
-//    		
-//    		consenseNum++;
-//    	}
-//    }
+	public static void adjustFragment() {
+		if (splitFragment()) {
+			Integer k = chooseFragmentation();
+			if (k.intValue() != -1) {
+				int l = getNewFragmentationNumber();
+				Fragmentation newfragmentation = new Fragmentation(String.valueOf(l));
+				fragmentationList.put(newfragmentation.getID(), newfragmentation);
+				Fragmentation fragmentation = fragmentationList.get(k);
+
+				ArrayList<Trading> newTransation = fragmentation.implementation(newfragmentation);
+				for (int i = 0; i < newTransation.size(); ++i)
+					transaction.add(newTransation.get(i));
+			}
+		} else if (mergeFragment()) {
+			graph = new int[fragmentationList.size()][fragmentationList.size()];
+			ArrayList<Trading> temptrade = masterBlock.getTransaction();
+			for (int t = 0; t < temptrade.size(); ++t) {
+				Trading trade = temptrade.get(t);
+				int t1 = Integer.valueOf(userList.get(trade.getTransactionSender()).getFragmentationID()).intValue();
+				int t2 = Integer.valueOf(userList.get(trade.getTransactionReceiver()).getFragmentationID()).intValue();
+				graph[t1][t2] += 1;
+				graph[t2][t1] += 1;
+			}
+			int max = 0;
+			int maxi = -1;
+			int maxj = -1;
+			for (int i = 0; i < graph.length; i++) {
+				for (int j = i + 1; j < graph.length; j++) {
+					if (graph[i][j] > max) {
+						max = graph[i][j];
+						maxi = i;
+						maxj = j;
+					}
+				}
+			}
+			String frag1, frag2;
+			frag1 = String.valueOf(maxi);
+			frag2 = String.valueOf(maxj);
+			while (frag1.length() < 3) {
+				frag1 = "0" + frag1;
+			}
+			while (frag2.length() < 3) {
+				frag2 = "0" + frag2;
+			}
+			
+			Fragmentation fragmentation = fragmentationList.get(frag1);
+			fragmentation.merge(fragmentationList.get(frag2));
+			
+		}
+	}
 
 	// judge which is large, nowTime or blockTime
 	public static boolean timeOver(Timestamp nowTime, Timestamp blockTime) {
 		if (nowTime.after(blockTime))
 			return true;
 		return false;
+	}
+
+	public static void updateLocalUserAccount() {
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragmentation = entry.getValue();
+			fragmentation.setLocalAccount();
+		}
+	}
+
+	public static void generateMasterChain() {
+		ArrayList<String> keys = new ArrayList<>();
+		ArrayList<Integer> times = new ArrayList<>();
+		for (Map.Entry<String, String> entry : tradeHashMap.entrySet()) {
+			String key = entry.getKey();
+			if (!keys.contains(key)) {
+				keys.add(key);
+				times.add(1);
+			} else {
+				int index = keys.indexOf(key);
+				times.set(index, times.get(index) + 1);
+			}
+		}
+		int max = 0;
+		for (int i = 0; i < times.size(); i++) {
+			if (times.get(i) > max)
+				max = times.get(i);
+		}
+		Node pbftAnswerNode = nodeList.get(keys.get(times.indexOf(max)));
+		pbftAnswerFragment = pbftAnswerNode.getFragmentation();
+
+		masterBlock = new Block(pbftAnswerFragment.pbftTransaction);
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragment = entry.getValue();
+			masterBlock.addTransaction(fragment.transaction);
+		}
+
+		ArrayList<Trading> trades = masterBlock.getTransaction();
+		for (int i = 0; i < trades.size(); ++i) {
+			Trading trade = trades.get(i);
+			User sender = userList.get(trade.getTransactionSender());
+			User receiver = userList.get(trade.getTransactionReceiver());
+			sender.minusMoney(trade.getTransactionAmount());
+			receiver.addMoney(trade.getTransactionAmount());
+		}
+
+		for (Map.Entry<String, Double> entry : userAccount.entrySet()) {
+			User user = userList.get(entry.getKey());
+			entry.setValue(user.getChargeAccount());
+		}
+
+	}
+
+	public static void generateLocalChain() {
+		for (int i = 0; i < pbftAnswerFragment.pbftTransaction.size(); i++) {
+			Trading trade = pbftAnswerFragment.pbftTransaction.get(i);
+			User user = userList.get(trade.getTransactionSender());
+			Fragmentation fragmentation = user.getFragmentation();
+			fragmentation.transaction.add(trade);
+			user = userList.get(trade.getTransactionReceiver());
+			fragmentation = user.getFragmentation();
+			fragmentation.transaction.add(trade);
+		}
+
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragment = entry.getValue();
+			fragment.generateBlcok();
+		}
+
+	}
+
+	public static void main(String[] args) {
+		fragmentationList = new HashMap<String, Fragmentation>();
+		nodeList = new HashMap<String, Node>();
+		userList = new HashMap<String, User>();
+		transaction = new ArrayList<Trading>();
+		userAccount = new HashMap<String, Double>();
+		pbftUserAccount = new HashMap<String, Double>();
+
+		Initialize();
+		dis = floydWarshall(dis);
+
+		dropWrongTrade();
+		updateLocalUserAccount();
+		dropDoubleTrade();
+
+		consense();
+
+		generateMasterChain();
+		generateLocalChain();
+
+		adjustFragment();
+
+//		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) { 
+//			Fragmentation fragmentation = entry.getValue();
+//			fragmentation.printUserAccount();
+//		}
 	}
 
 	public static int[][] floydWarshall(int[][] road) {
@@ -171,12 +323,10 @@ public class BlockChain {
 			Double money = userAccount.get(sender.getID());
 			if (money >= trade.getTransactionAmount()) {
 				userAccount.put(sender.getID(), money - trade.getTransactionAmount());
-			}
-			else {
+			} else {
 				transaction.remove(i--);
 			}
 		}
-		
 
 	}
 
@@ -194,12 +344,215 @@ public class BlockChain {
 
 	}
 
-	public static void updateLocalUserAccount() {
+	public static Node nextPbftMasterNode() {
+		String nextPbftMaxterID = pbftMasterNode.getID();
 		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
 			Fragmentation fragmentation = entry.getValue();
-			fragmentation.setLocalAccount();
-			// System.out.println("Key = " + entry.getKey() + ", Value = " +
-			// entry.getValue());
+			if (Integer.valueOf(fragmentation.getMasterNodeID()).intValue() > Integer.valueOf(nextPbftMaxterID)
+					.intValue()) {
+				nextPbftMaxterID = fragmentation.getID();
+				break;
+			}
+		}
+		if (nextPbftMaxterID == pbftMasterNode.getID()) {
+			nextPbftMaxterID = "-001";
+			for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+				Fragmentation fragmentation = entry.getValue();
+				if (Integer.valueOf(fragmentation.getMasterNodeID()).intValue() > Integer.valueOf(nextPbftMaxterID)
+						.intValue()) {
+					nextPbftMaxterID = fragmentation.getID();
+					break;
+				}
+			}
+		}
+		return nodeList.get(nextPbftMaxterID);
+	}
+
+	public static boolean isPbftMasterTrust() {
+		ArrayList<String> values = new ArrayList<>();
+		ArrayList<Integer> times = new ArrayList<>();
+		for (Map.Entry<String, String> entry : pbftHashMap.entrySet()) {
+			String value = entry.getValue();
+			if (!values.contains(value)) {
+				values.add(value);
+				times.add(1);
+			} else {
+				int index = values.indexOf(value);
+				times.set(index, times.get(index) + 1);
+			}
+		}
+		int max = 0;
+		int n = (2 * fragmentationList.size()) / 3;
+		for (int i = 0; i < times.size(); i++) {
+			max = Math.max(times.get(i), max);
+		}
+		return max > n;
+	}
+
+	public static void virtualSendTrade() {
+		pbftHashMap = new HashMap<>();
+		int answer = 0;
+		int senderDisID = Integer.valueOf(pbftMasterNode.getID()).intValue();
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragmentation = entry.getValue();
+			int receiverDisID = Integer.valueOf(fragmentation.getMasterNodeID()).intValue();
+			answer = answer + dis[senderDisID][receiverDisID];
+			pbftHashMap.put(fragmentation.getMasterNodeID(), fragmentation.transactionHash());
+		}
+		try {
+			Thread.sleep(answer * 2);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void sendPbftTrade() {
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragmentation = entry.getValue();
+			for (int i = 0; i < transaction.size(); i++) {
+				fragmentation.pbftTransaction.add(transaction.get(i));
+			}
+			fragmentation.tradingProve();
+		}
+	}
+
+	public static void pbftVote() {
+		tradeHashMap = new HashMap<>();
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragmentation = entry.getValue();
+			tradeHashMap.put(fragmentation.getMasterNodeID(), fragmentation.tradingProve());
+		}
+	}
+
+	public static boolean commitVote() {
+		commit = 0;
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragmentation = entry.getValue();
+			if (fragmentation.pbftCommit()) {
+				commit++;
+			}
+		}
+		int n = (2 * fragmentationList.size()) / 3;
+		return commit > n;
+	}
+
+	public static void posCommit() {
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragmentation = entry.getValue();
+			fragmentation.selectBillingNode();
+		}
+	}
+
+	public static void consense() {
+		long startTime = System.currentTimeMillis();
+		sendPbftTrade();
+		virtualSendTrade();
+		while (!isPbftMasterTrust()) {
+			pbftMasterNode = nextPbftMasterNode();
+			virtualSendTrade();
+		}
+
+		pbftVote();
+		commitVote();
+		long endTime = System.currentTimeMillis();
+		System.out.println("程序运行时间： " + (endTime - startTime) + "ms");
+		timePBFT = endTime - startTime;
+
+		posCommit();
+	}
+
+	public void adjustUsers() {
+		HashMap<String, String> usersNeedChange = new HashMap<String, String>(); // 需要动态加入或退出的用户 <用户ID，需要加入的分片ID>
+		ArrayList<UserTx> table = new ArrayList<UserTx>();
+		for (int i = 0; i < finalTransaction.size(); i++) {
+			int flag = 0;
+			String sender = finalTransaction.get(i).getTransactionSender(); // 记录当前交易的发送者ID
+			for (int j = 0; j < table.size(); j++) // 遍历用户交易表，判断此用户是否已经存在
+			{
+				if (table.get(j).userId.equals(sender)) // 用户已存在
+				{
+					flag = 1;
+					String fragmentationID_sender = userList.get(sender).getFragmentationID(); // 发送方所在分片ID
+					String fragmentationID_receiver = userList.get(finalTransaction.get(i).getTransactionReceiver())
+							.getFragmentationID(); // 接收方所在分片ID
+					if (fragmentationID_sender.equals(fragmentationID_receiver)) // 片内交易
+					{
+						table.get(j).times++;// 片内交易次数加1
+					}
+					// 片外交易
+					else {
+						String outFragId = fragmentationID_receiver; // 记录分片ID
+						if (table.get(j).outTx.get(outFragId) == null) {
+							table.get(j).outTx.put(outFragId, 1); // 不存在此分片，交易次数记为1
+						} else {
+							table.get(j).outTx.put(outFragId, table.get(j).outTx.get(outFragId) + 1);// 已存在此分片，交易次数加1
+						}
+					}
+					break;
+				}
+			}
+			if (flag == 0) // 不存在此用户
+			{
+				UserTx temp = new UserTx(); // 新建一个用户
+				temp.userId = finalTransaction.get(i).getTransactionSender(); // 记录用户ID
+				String fragmentationID_sender = userList.get(temp.userId).getFragmentationID(); // 发送方所在分片ID
+				String fragmentationID_receiver = userList.get(finalTransaction.get(i).getTransactionReceiver())
+						.getFragmentationID(); // 接收方所在分片ID
+				temp.inFragId = fragmentationID_sender; // 记录用户所在分片
+				if (fragmentationID_sender.equals(fragmentationID_receiver)) // 如果是片内交易
+				{
+					temp.times++; // 片内交易次数+1
+				} else // 片外交易
+				{
+					String outFragId = fragmentationID_receiver; // 记录分片ID
+					temp.outTx.put(outFragId, 1);// 片外交易次数初始化为1
+				}
+				table.add(temp);// 将初始化好的用户加入表中
+			}
+		}
+		for (int i = 0; i < table.size(); i++) // 遍历用户表
+		{
+			int max_times = 0;
+			String max_ID = null;
+			for (Map.Entry<String, Integer> entry : table.get(i).outTx.entrySet()) // 遍历跨分片map
+			{
+				if (entry.getValue() > max_times) {
+					max_times = entry.getValue(); // 记录最大跨分片交易次数
+					max_ID = entry.getKey();// 记录跨分片ID
+				}
+			}
+			table.get(i).outFragId = max_ID;
+			table.get(i).maxTimes = max_times;
+			// table.get(i).proportion = table.get(i).maxTimes/table.get(i).times;
+			if (table.get(i).maxTimes > table.get(i).times) // 如果一个用户的跨片交易多于片内交易，则把其放入需要列表中
+			{
+				usersNeedChange.put(table.get(i).userId, table.get(i).outFragId);
+			}
+		}
+		for (Map.Entry<String, String> entry : usersNeedChange.entrySet()) // 遍历需要调整的用户列表
+		{
+			Fragmentation fragmentation = fragmentationList.get(entry.getValue());
+			int min = fragmentation.nodeList.get(0).getUserNumber();
+			int index = 0;
+			for (int i = 1; i < fragmentation.nodeList.size(); i++) // 利用负载均衡，用户选择分片内的一个节点加入
+			{
+				if (fragmentation.nodeList.get(i).getUserNumber() < min) {
+					min = fragmentation.nodeList.get(i).getUserNumber();
+					index = i;
+				}
+			}
+			userList.get(entry.getKey()).node = fragmentation.nodeList.get(index); // 改变用户所属的节点
+			fragmentation.nodeList.get(index).addUser(userList.get(entry.getKey())); // 节点加入此用户
+			fragmentation.nodeList.get(index).deleteUser(userList.get(entry.getKey())); // 节点删除此用户
+			fragmentation.addUser(userList.get(entry.getKey()));// 分片加入此用户
+			fragmentation.deleteUser(userList.get(entry.getKey()));// 分片删除此用户
+		}
+		for (int i = 0; i < fragmentationList.size(); i++) // 打印出所有分片有哪些用户
+		{
+			System.out.println(fragmentationList.get(i));
+			for (int j = 0; j < fragmentationList.get(i).userList.size(); j++) {
+				System.out.println(fragmentationList.get(i).userList.get(j));
+			}
 		}
 	}
 
@@ -299,6 +652,7 @@ public class BlockChain {
 			User user = new User(myInfo[0], node, Double.parseDouble(myInfo[2]));
 			userList.put(myInfo[0], user);
 			userAccount.put(myInfo[0], Double.parseDouble(myInfo[2]));
+			pbftUserAccount.put(myInfo[0], Double.parseDouble(myInfo[2]));
 			node.addUser(user);
 			Fragmentation fragmentation = node.getFragmentation();
 			fragmentation.addUser(user);
@@ -333,26 +687,7 @@ public class BlockChain {
 			Trading trade = new Trading(myInfo[0], money, myInfo[1], time);
 			transaction.add(trade);
 		}
-	}
 
-	public static void main(String[] args) {
-		fragmentationList = new HashMap<String, Fragmentation>();
-		nodeList = new HashMap<String, Node>();
-		userList = new HashMap<String, User>();
-		transaction = new ArrayList<Trading>();
-		userAccount = new HashMap<String, Double>();
-
-		Initialize();
-		dis = floydWarshall(dis);
-
-		dropWrongTrade();
-		updateLocalUserAccount();
-		dropDoubleTrade();
-
-//		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) { 
-//			Fragmentation fragmentation = entry.getValue();
-//			fragmentation.printUserAccount();
-//		}
 	}
 
 }
