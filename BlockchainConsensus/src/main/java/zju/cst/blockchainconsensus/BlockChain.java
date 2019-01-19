@@ -33,8 +33,6 @@ public class BlockChain {
 	private static ArrayList<Trading> transaction;
 	private static Map<String, Double> userAccount;
 	public static Map<String, Double> pbftUserAccount;
-	private static Timestamp blockTime;
-	private static int consenseNum;
 	public static int[][] dis;
 	private static Node pbftMasterNode;
 	private static ArrayList<Trading> finalTransaction;// 主链最后交易池
@@ -64,14 +62,14 @@ public class BlockChain {
 
 	// find the number of new fragmentation
 	public static int getNewFragmentationNumber() {
-		int j = 0;
-		Integer p;
+		Integer p = 0;
 		while (true) {
-			p = j;
-			if (fragmentationList.get(p) == null)
-				return j;
+			String pString = p.toString();
+			while (pString.length() < 3) pString = "0" + pString;
+			if (fragmentationList.get(pString) == null)
+				return p.intValue();
 			else
-				j++;
+				p = p + 1;
 		}
 
 	}
@@ -82,7 +80,7 @@ public class BlockChain {
 		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
 			int i = Integer.parseInt(entry.getKey());
 			Fragmentation fragment = entry.getValue();
-			int TPSpos = 500;
+			int TPSpos = 50;
 			int s = fragment.tryFragment(TPSpos);
 			if (s > n) {
 				n = s;
@@ -120,13 +118,16 @@ public class BlockChain {
 
 	// adjust fragment
 	public static void adjustFragment() {
+		Integer k;
 		if (splitFragment()) {
-			Integer k = chooseFragmentation();
+			k = chooseFragmentation();
 			if (k.intValue() != -1) {
 				int l = getNewFragmentationNumber();
 				Fragmentation newfragmentation = new Fragmentation(String.valueOf(l));
 				fragmentationList.put(newfragmentation.getID(), newfragmentation);
-				Fragmentation fragmentation = fragmentationList.get(k);
+				String kString = k.toString();
+				while (kString.length() < 3) kString = "0" + kString;
+				Fragmentation fragmentation = fragmentationList.get(kString);
 
 				ArrayList<Trading> newTransation = fragmentation.implementation(newfragmentation);
 				for (int i = 0; i < newTransation.size(); ++i)
@@ -163,10 +164,10 @@ public class BlockChain {
 			while (frag2.length() < 3) {
 				frag2 = "0" + frag2;
 			}
-			
+
 			Fragmentation fragmentation = fragmentationList.get(frag1);
 			fragmentation.merge(fragmentationList.get(frag2));
-			
+
 		}
 	}
 
@@ -252,25 +253,34 @@ public class BlockChain {
 		transaction = new ArrayList<Trading>();
 		userAccount = new HashMap<String, Double>();
 		pbftUserAccount = new HashMap<String, Double>();
-
+		
 		Initialize();
+		System.out.println("1");
 		dis = floydWarshall(dis);
+		System.out.println("2");
 
 		dropWrongTrade();
 		updateLocalUserAccount();
 		dropDoubleTrade();
+		System.out.println("3");
 
 		consense();
+		System.out.println("4");
 
 		generateMasterChain();
 		generateLocalChain();
+		System.out.println("5");
 
 		adjustFragment();
+		System.out.println("6");
+		
+		print1();
 
-//		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) { 
-//			Fragmentation fragmentation = entry.getValue();
-//			fragmentation.printUserAccount();
-//		}
+	}
+
+	public static void print1() {
+		masterBlock.print();
+
 	}
 
 	public static int[][] floydWarshall(int[][] road) {
@@ -391,6 +401,7 @@ public class BlockChain {
 
 	public static void virtualSendTrade() {
 		pbftHashMap = new HashMap<>();
+		pbftMasterNode = nodeList.get("0000");
 		int answer = 0;
 		int senderDisID = Integer.valueOf(pbftMasterNode.getID()).intValue();
 		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
@@ -547,13 +558,13 @@ public class BlockChain {
 			fragmentation.addUser(userList.get(entry.getKey()));// 分片加入此用户
 			fragmentation.deleteUser(userList.get(entry.getKey()));// 分片删除此用户
 		}
-		for (int i = 0; i < fragmentationList.size(); i++) // 打印出所有分片有哪些用户
-		{
-			System.out.println(fragmentationList.get(i));
-			for (int j = 0; j < fragmentationList.get(i).userList.size(); j++) {
-				System.out.println(fragmentationList.get(i).userList.get(j));
-			}
-		}
+//		for (int i = 0; i < fragmentationList.size(); i++) // 打印出所有分片有哪些用户
+//		{
+//			System.out.println(fragmentationList.get(i));
+//			for (int j = 0; j < fragmentationList.get(i).userList.size(); j++) {
+//				System.out.println(fragmentationList.get(i).userList.get(j));
+//			}
+//		}
 	}
 
 	public static void Initialize() {

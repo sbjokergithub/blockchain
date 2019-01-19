@@ -17,6 +17,11 @@ public class Trading {
         this.time = time;
     }
 
+    public String print() {
+        return "Trading [transactionSender=" + transactionSender + ", transactionAmount=" + transactionAmount
+                + ", transactionReceiver=" + transactionReceiver + ", time=" + time + "]";		
+	}
+    
     public String getTransactionSender() {
         return transactionSender;
     }

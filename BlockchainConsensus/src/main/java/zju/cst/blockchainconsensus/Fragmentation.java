@@ -30,6 +30,8 @@ public class Fragmentation {
 		this.pbftTransaction = new ArrayList<Trading>();
 		this.pos = new HashMap<String, Integer>();
 		this.localUserAccount = new HashMap<String, Double>();
+		this.pbftTradeMap = new HashMap<String, String>();
+		this.localPbftUserAccount = new HashMap<>();
 	}
 
 	public Fragmentation(String ID) {
@@ -41,6 +43,8 @@ public class Fragmentation {
 		this.pbftTransaction = new ArrayList<Trading>();
 		this.pos = new HashMap<String, Integer>();
 		this.localUserAccount = new HashMap<String, Double>();
+		this.pbftTradeMap = new HashMap<String, String>();
+		this.localPbftUserAccount = new HashMap<>();
 	}
 
 	public void generateBlcok() {
@@ -80,9 +84,8 @@ public class Fragmentation {
 
 	public String tradingProve() {
 		String answer = "";
-		this.pbftTradeMap = new HashMap<>();
 		for (Map.Entry<String, Double> entry : BlockChain.pbftUserAccount.entrySet()) {
-			this.localPbftUserAccount.put(entry.getKey(), entry.getValue());
+			localPbftUserAccount.put(entry.getKey(), entry.getValue());
 		}
 		for (int i = 0; i < pbftTransaction.size(); i++) {
 			Trading trade = transaction.get(i);
@@ -255,7 +258,7 @@ public class Fragmentation {
 
 	// a fragmentation wants to fragmented
 	public int tryFragment(int TPSpos) {
-		if (nodeList.size() >= 6 && transaction.size() > TPSpos)
+		if (nodeList.size() >= 4 && transaction.size() > TPSpos)
 			return transaction.size();
 		else
 			return 0;

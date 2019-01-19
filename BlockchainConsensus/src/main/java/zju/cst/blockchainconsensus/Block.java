@@ -22,4 +22,10 @@ public class Block {
 		return this.transactionList;
 	}
 	
+	public void print() {
+		for (int i = 0; i<this.transactionList.size(); ++i) {
+			System.out.println(this.transactionList.get(i).print());
+		}
+	}
+	
 }
