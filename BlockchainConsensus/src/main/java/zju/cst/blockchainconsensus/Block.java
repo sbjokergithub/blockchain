@@ -9,7 +9,10 @@ public class Block {
 	private String indexID;
 	
 	public Block(ArrayList<Trading> tradeList){
-		this.transactionList = tradeList;
+		this.transactionList = new ArrayList<Trading>();
+		for (int i=0; i<tradeList.size(); ++i) {
+			this.transactionList.add(tradeList.get(i));
+		}
 	}
 	
 	public void addTransaction(ArrayList<Trading> tradeList) {

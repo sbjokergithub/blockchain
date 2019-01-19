@@ -44,6 +44,46 @@ public class BlockChain {
 	private static Fragmentation pbftAnswerFragment;
 	private static int[][] graph;
 
+	public static void main(String[] args) {
+		fragmentationList = new HashMap<String, Fragmentation>();
+		nodeList = new HashMap<String, Node>();
+		userList = new HashMap<String, User>();
+		transaction = new ArrayList<Trading>();
+		userAccount = new HashMap<String, Double>();
+		pbftUserAccount = new HashMap<String, Double>();
+
+		Initialize();
+		System.out.println("1");
+		dis = floydWarshall(dis);
+		System.out.println("2");
+
+		dropWrongTrade();
+		updateLocalUserAccount();
+		dropDoubleTrade();
+		System.out.println("3");
+
+		consense();
+		System.out.println("4");
+
+		generateMasterChain();
+		generateLocalChain();
+		System.out.println("5");
+
+		adjustFragment();
+		System.out.println("6");
+
+		print1();
+		print2();
+
+	}
+
+	public static String supplement(String s, int r) {
+		while (s.length() < r) {
+			s = "0"+s;
+		}
+		return s;
+	}
+	
 	// Randomly generate validation groups£¿
 	public ArrayList<String> generateValidationGroups() {
 
@@ -65,7 +105,8 @@ public class BlockChain {
 		Integer p = 0;
 		while (true) {
 			String pString = p.toString();
-			while (pString.length() < 3) pString = "0" + pString;
+			while (pString.length() < 3)
+				pString = "0" + pString;
 			if (fragmentationList.get(pString) == null)
 				return p.intValue();
 			else
@@ -93,13 +134,6 @@ public class BlockChain {
 			return -1;
 	}
 
-	// generate a block
-	public static void generateBlock() {
-
-		// after generate a block, a fragmentation adjustment must be down
-//    	adjustFragment();
-	}
-
 	// if the system can split fragment
 	public static boolean splitFragment() {
 		if (timePOS > timePBFT)
@@ -119,14 +153,18 @@ public class BlockChain {
 	// adjust fragment
 	public static void adjustFragment() {
 		Integer k;
+		System.out.println("split or merge");
+		System.out.println(timePOS < timePBFT);
 		if (splitFragment()) {
+			System.out.println("split");
 			k = chooseFragmentation();
 			if (k.intValue() != -1) {
 				int l = getNewFragmentationNumber();
 				Fragmentation newfragmentation = new Fragmentation(String.valueOf(l));
 				fragmentationList.put(newfragmentation.getID(), newfragmentation);
 				String kString = k.toString();
-				while (kString.length() < 3) kString = "0" + kString;
+				while (kString.length() < 3)
+					kString = "0" + kString;
 				Fragmentation fragmentation = fragmentationList.get(kString);
 
 				ArrayList<Trading> newTransation = fragmentation.implementation(newfragmentation);
@@ -134,7 +172,11 @@ public class BlockChain {
 					transaction.add(newTransation.get(i));
 			}
 		} else if (mergeFragment()) {
+			System.out.println("merge");
 			graph = new int[fragmentationList.size()][fragmentationList.size()];
+			for (int i = 0; i < fragmentationList.size(); ++i)
+				for (int j = 0; j < fragmentationList.size(); ++j)
+					graph[i][j] = 0;
 			ArrayList<Trading> temptrade = masterBlock.getTransaction();
 			for (int t = 0; t < temptrade.size(); ++t) {
 				Trading trade = temptrade.get(t);
@@ -143,7 +185,7 @@ public class BlockChain {
 				graph[t1][t2] += 1;
 				graph[t2][t1] += 1;
 			}
-			int max = 0;
+			int max = -1;
 			int maxi = -1;
 			int maxj = -1;
 			for (int i = 0; i < graph.length; i++) {
@@ -155,18 +197,15 @@ public class BlockChain {
 					}
 				}
 			}
-			String frag1, frag2;
-			frag1 = String.valueOf(maxi);
-			frag2 = String.valueOf(maxj);
-			while (frag1.length() < 3) {
-				frag1 = "0" + frag1;
-			}
-			while (frag2.length() < 3) {
-				frag2 = "0" + frag2;
-			}
+			if (max >= 0) {
+				String frag1, frag2;
+				frag1 = supplement(String.valueOf(maxi),3);
+				frag2 = supplement(String.valueOf(maxj),3);		
 
-			Fragmentation fragmentation = fragmentationList.get(frag1);
-			fragmentation.merge(fragmentationList.get(frag2));
+				Fragmentation fragmentation = fragmentationList.get(frag1);
+				fragmentation.merge(fragmentationList.get(frag2));
+				fragmentationList.remove(frag2);
+			}
 
 		}
 	}
@@ -186,6 +225,7 @@ public class BlockChain {
 	}
 
 	public static void generateMasterChain() {
+		Fragmentation myFragmentation = fragmentationList.get("001");
 		ArrayList<String> keys = new ArrayList<>();
 		ArrayList<Integer> times = new ArrayList<>();
 		for (Map.Entry<String, String> entry : tradeHashMap.entrySet()) {
@@ -203,10 +243,12 @@ public class BlockChain {
 			if (times.get(i) > max)
 				max = times.get(i);
 		}
+
 		Node pbftAnswerNode = nodeList.get(keys.get(times.indexOf(max)));
 		pbftAnswerFragment = pbftAnswerNode.getFragmentation();
 
 		masterBlock = new Block(pbftAnswerFragment.pbftTransaction);
+
 		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
 			Fragmentation fragment = entry.getValue();
 			masterBlock.addTransaction(fragment.transaction);
@@ -246,41 +288,20 @@ public class BlockChain {
 
 	}
 
-	public static void main(String[] args) {
-		fragmentationList = new HashMap<String, Fragmentation>();
-		nodeList = new HashMap<String, Node>();
-		userList = new HashMap<String, User>();
-		transaction = new ArrayList<Trading>();
-		userAccount = new HashMap<String, Double>();
-		pbftUserAccount = new HashMap<String, Double>();
-		
-		Initialize();
-		System.out.println("1");
-		dis = floydWarshall(dis);
-		System.out.println("2");
-
-		dropWrongTrade();
-		updateLocalUserAccount();
-		dropDoubleTrade();
-		System.out.println("3");
-
-		consense();
-		System.out.println("4");
-
-		generateMasterChain();
-		generateLocalChain();
-		System.out.println("5");
-
-		adjustFragment();
-		System.out.println("6");
-		
-		print1();
-
+	public static void print1() {
+		System.out.println("master block");
+		masterBlock.print();
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragment = entry.getValue();
+			System.out.println(fragment.getID());
+		}
 	}
 
-	public static void print1() {
-		masterBlock.print();
-
+	public static void print2() {
+		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
+			Fragmentation fragment = entry.getValue();
+			fragment.print();
+		}
 	}
 
 	public static int[][] floydWarshall(int[][] road) {
@@ -418,6 +439,7 @@ public class BlockChain {
 	}
 
 	public static void sendPbftTrade() {
+		System.out.println("sendPbftTrade:" + transaction.size());
 		for (Map.Entry<String, Fragmentation> entry : fragmentationList.entrySet()) {
 			Fragmentation fragmentation = entry.getValue();
 			for (int i = 0; i < transaction.size(); i++) {

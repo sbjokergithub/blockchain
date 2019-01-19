@@ -57,8 +57,6 @@ public class Fragmentation {
 			Node node = oldNode.get(i);
 			node.setFragment(this);
 		}
-		
-		fragmentation = null;
 	}
 
 	public boolean pbftCommit() {
@@ -113,6 +111,16 @@ public class Fragmentation {
 		return answer;
 	}
 
+	public void print() {
+		System.out.println(this.getID()+" local block");
+		this.localBlock.print();		
+		System.out.println("User List");
+		for (int i=0; i<userList.size(); ++i) {
+			User user = userList.get(i);
+			System.out.println(user.getID());
+		}
+	}
+	
 	public String transactionHash() {
 		String string = SHA(this.pbftTransaction.toString(), "SHA-256");
 		return string;
@@ -230,12 +238,12 @@ public class Fragmentation {
 
 	// Select the billing node and return the ID of the billing node
 	public String selectBillingNode() {
-		int target = 123;
+		int target = 10;
 		int i;
 		while (true) {
 			for (i = 0; i < nodeList.size(); i++) {
 				int random = (int) (1 + Math.random() * (100));
-				if (random < target * nodeList.get(i).getCoinNumber()) {
+				if (random < target * 5) {
 					break;
 				}
 			}
