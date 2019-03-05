@@ -362,12 +362,12 @@ public class Fragmentation {
 
 		ArrayList<Trading> outTrading = new ArrayList<Trading>();
 
-		for (int i = this.transaction.size() - 1; i >= 0; ++i) {
+		for (int i = this.transaction.size() - 1; i >= 0; --i) {
 			Trading trade = this.transaction.get(i);
 			User user1 = trade.userGetSender();
 			User user2 = trade.userGetReceiver();
 
-			if (user1.getFragmentationID() == user2.getFragmentationID()) {
+			if (user1.getFragmentationID().equals(user2.getFragmentationID())) {
 				if (user1.getFragmentationID() != this.ID) {
 					this.transaction.remove(i);
 					newFragment.addTransaction(trade);

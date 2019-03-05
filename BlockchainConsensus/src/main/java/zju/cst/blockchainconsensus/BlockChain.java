@@ -19,7 +19,7 @@ class UserTx {
 	// 跨分片交易
 	public Map<String, Integer> outTx; // 分片ID，交易次数
 	public String outFragId; // 接收方所在交易分片ID
-	public int maxTimes; // 最大跨片交易次数
+	public int maxTimes; // 最大跨片交易次数Q
 	// 片内交易
 	public String inFragId; // 发送方所在交易分片ID
 	public int times; // 片内交易次数
@@ -36,7 +36,7 @@ public class BlockChain {
 	public static int[][] dis;
 	private static Node pbftMasterNode;
 	private static ArrayList<Trading> finalTransaction;// 主链最后交易池
-	private static long timePOS, timePBFT;
+	private static long timePOS=16000, timePBFT;
 	private static Map<String, String> pbftHashMap;
 	public static Map<String, String> tradeHashMap;
 	static int commit;
@@ -154,13 +154,18 @@ public class BlockChain {
 	public static void adjustFragment() {
 		Integer k;
 		System.out.println("split or merge");
+		System.out.println("timePOS:"+timePOS);
+		System.out.println("timePBFT:"+timePBFT);
 		System.out.println(timePOS < timePBFT);
 		if (splitFragment()) {
 			System.out.println("split");
 			k = chooseFragmentation();
 			if (k.intValue() != -1) {
 				int l = getNewFragmentationNumber();
-				Fragmentation newfragmentation = new Fragmentation(String.valueOf(l));
+				String s = String.valueOf(l);
+				while (s.length()<3) 
+					s = "0" + s;
+				Fragmentation newfragmentation = new Fragmentation(s);
 				fragmentationList.put(newfragmentation.getID(), newfragmentation);
 				String kString = k.toString();
 				while (kString.length() < 3)
@@ -170,6 +175,7 @@ public class BlockChain {
 				ArrayList<Trading> newTransation = fragmentation.implementation(newfragmentation);
 				for (int i = 0; i < newTransation.size(); ++i)
 					transaction.add(newTransation.get(i));
+				newfragmentation.generateBlcok();
 			}
 		} else if (mergeFragment()) {
 			System.out.println("merge");
@@ -225,7 +231,7 @@ public class BlockChain {
 	}
 
 	public static void generateMasterChain() {
-		Fragmentation myFragmentation = fragmentationList.get("001");
+		Fragmentation myFragmentation = fragmentationList.get("000");
 		ArrayList<String> keys = new ArrayList<>();
 		ArrayList<Integer> times = new ArrayList<>();
 		for (Map.Entry<String, String> entry : tradeHashMap.entrySet()) {
@@ -488,7 +494,7 @@ public class BlockChain {
 		pbftVote();
 		commitVote();
 		long endTime = System.currentTimeMillis();
-		System.out.println("程序运行时间： " + (endTime - startTime) + "ms");
+		System.out.println("pbft运行时间： " + (endTime - startTime) + "ms");
 		timePBFT = endTime - startTime;
 
 		posCommit();
@@ -717,7 +723,7 @@ public class BlockChain {
 			}
 			int money = Integer.parseInt(myInfo[2]);
 			Timestamp time = Timestamp.valueOf(myInfo[3] + " " + myInfo[4]);
-			Trading trade = new Trading(myInfo[0], money, myInfo[1], time);
+			Trading trade = new Trading(myInfo[0], money, myInfo[1], time, userList.get(myInfo[0]),userList.get(myInfo[1]));
 			transaction.add(trade);
 		}
 

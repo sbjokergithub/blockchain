@@ -1,3 +1,0 @@
-fragmentation1 masterNode1
-fragmentation2 masterNode2
-fragmentation3 masterNode3

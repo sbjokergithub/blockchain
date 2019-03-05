@@ -10,10 +10,12 @@ public class Trading {
     private User sender;
     private User receiver;
 
-    public Trading(String transactionSender, double transactionAmount, String transactionReceiver, Timestamp time) {
+    public Trading(String transactionSender, double transactionAmount, String transactionReceiver, Timestamp time,User sender, User receiver) {
         this.transactionSender = transactionSender;
         this.transactionAmount = transactionAmount;
         this.transactionReceiver = transactionReceiver;
+        this.sender = sender;
+        this.receiver = receiver;
         this.time = time;
     }
 
@@ -35,11 +37,11 @@ public class Trading {
     }
     
     public User userGetSender() {
-    	return sender;
+    	return this.sender;
     }
     
     public User userGetReceiver() {
-    	return receiver;
+    	return this.receiver;
     }
 
     public Timestamp getTime() {
